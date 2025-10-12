@@ -16,16 +16,6 @@ for instance in "$@"; do
     --query 'Instances[0].InstanceId' \
     --output text 2>&1)
 
-  # Error handling
-  if [[ "$InstanceId" == *"VcpuLimitExceeded"* ]]; then
-    echo "❌ ERROR: vCPU limit exceeded. Skipping $instance."
-    continue
-  elif [[ "$InstanceId" == *"error"* || "$InstanceId" == *"An error occurred"* ]]; then
-    echo "❌ ERROR launching $instance:"
-    echo "$InstanceId"
-    continue
-  fi
-
   echo "✅ Instance launched: $InstanceId"
   sleep 5  # Wait a bit to allow the instance to initialize
 

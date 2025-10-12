@@ -1,17 +1,17 @@
 #!/bin/bash
 AMI_ID="ami-09c813fb71547fc4f"
-SG_ID="sg-052879cc69a4a54b5" # Replace with your security group ID
+SG_ID="sg-052879cc69a4a54b5" # replace with your security group ID
 
 for instance in $@; 
 do
   InstanceId=$(aws ec2 run-instances --image-id $AMI_ID --instance-type t3.micro --security-group-ids
-  $SG_ID --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" --query 'Instances[0].[InstanceId,PrivateIpAddress]' --output text)
+  $SG_ID --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" --query 'Instances[0].InstanceId' --output text)
 
    # Get private ip
    if [ $instance != "frontend" ]; then
-     IP=$(aws ec2 describe-instances --instance-ids $InstanceId --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
+      IP=$(aws ec2 describe-instances --instance-ids $InstanceId --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
     else
-     IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$instance" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+     IP=$(aws ec2 describe-instances --instance-ids $InstanceId --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
    fi
 
    echo "$instance: $IP"

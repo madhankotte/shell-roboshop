@@ -1,11 +1,11 @@
 #!/bin/bash
 
 USERID=$(id -u)
-R='\e[31m' # Red
-G='\e[32m' # Green
-B='\e[34m' # Blue
-Y='\e[33m' # Yellow
-N='\e[0m'  # No Color
+R='\e[31m'
+G='\e[32m' 
+B='\e[34m' 
+Y='\e[33m' 
+N='\e[0m'  
 LOGS_FOLDER=/var/log/shell-roboshop
 SCRIPT_NAME=$(echo $0 | cut  -d'.' -f1).log
 LOGS_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
@@ -28,7 +28,7 @@ VALIDATE() {  # Functions receivd input through args just shell script args
     cp mongodb.repo /etc/yum.repos.d/mongodb.repo
     VALIDATE $? "adding mongodb repo file"
 
-    dnf mongodb installing -y >>$LOGS_FILE 2>&1
+    dnf install mongodb-org -y >>$LOGS_FILE 2>&1
     VALIDATE $? "installing mongodb"
 
     systemctl enable mongod >>$LOGS_FILE 2>&1

@@ -42,7 +42,7 @@ if [ ! -f mongodb.repo ]; then
 fi
 
 # Setup MongoDB
-cp mongo.repo /etc/yum.repos.d/mongo.repo
+cp mongodb.repo /etc/yum.repos.d/mongo.repo
 VALIDATE $? "Adding MongoDB repo file"
 
 dnf install mongodb-org -y >>$LOGS_FILE 2>&1

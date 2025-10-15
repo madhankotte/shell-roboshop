@@ -1,38 +1,55 @@
 #!/bin/bash
 
+# Exit if any command fails
+set -e
+
+# Color codes
+R="\033[31m"
+G="\033[32m"
+B="\033[34m"
+Y="\033[33m"
+N="\033[0m"
+
+# Log setup
 USERID=$(id -u)
-R='\e[31m'
-G='\e[32m' 
-B='\e[34m' 
-Y='\e[33m' 
-N='\e[0m'  
 LOGS_FOLDER=/var/log/shell-roboshop
-SCRIPT_NAME=$(echo $0 | cut  -d'.' -f1).log
-LOGS_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+SCRIPT_NAME=$(basename $0 .sh)
+LOGS_FILE="$LOGS_FOLDER/${SCRIPT_NAME}.log"
 
 mkdir -p $LOGS_FOLDER
-echo "starting the script execution at: $(date)"
+echo "Starting the script execution at: $(date)" | tee -a $LOGS_FILE
 
-    if [ "$USERID" -ne 0 ]; then
-       echo "Error::Please run this script with root or privelege."
-       exit 1 # failure is other than 0
-    fi
-VALIDATE() {  # Functions receivd input through args just shell script args
-     if [ $? -ne 0 ]; then
-        echo -e "$2 ... $R is failure $N" | tee -a $LOGS_FILE
+# Check for root privileges
+if [ "$USERID" -ne 0 ]; then
+    echo -e "${R}Error: Please run this script as root or with sudo privileges.${N}"
+    exit 1
+fi
+
+# Validation function
+VALIDATE() {
+    if [ $1 -ne 0 ]; then
+        echo -e "$2 ... ${R}FAILURE${N}" | tee -a $LOGS_FILE
         exit 1
     else
-        echo -e "$2.... $G is successful $N" | tee -a $LOGS_FILE
+        echo -e "$2 ... ${G}SUCCESS${N}" | tee -a $LOGS_FILE
     fi
-    }
-    cp mongodb.repo /etc/yum.repos.d/mongodb.repo
-    VALIDATE $? "adding mongodb repo file"
+}
 
-    dnf install mongodb-org -y >>$LOGS_FILE 2>&1
-    VALIDATE $? "installing mongodb"
+# Check if mongodb.repo exists
+if [ ! -f mongodb.repo ]; then
+    echo -e "${R}Error: mongodb.repo file not found in the current directory!${N}"
+    exit 1
+fi
 
-    systemctl enable mongod >>$LOGS_FILE 2>&1
-    VALIDATE $? "enabling mongodb"
+# Setup MongoDB
+cp mongodb.repo /etc/yum.repos.d/mongodb.repo
+VALIDATE $? "Adding MongoDB repo file"
 
-    systemctl start mongod >>$LOGS_FILE 2>&1    
-    VALIDATE $? "starting mongodb"
+dnf install mongodb-org -y >>$LOGS_FILE 2>&1
+VALIDATE $? "Installing MongoDB"
+
+systemctl enable mongod >>$LOGS_FILE 2>&1
+VALIDATE $? "Enabling MongoDB service"
+
+systemctl start mongod >>$LOGS_FILE 2>&1    
+VALIDATE $? "Starting MongoDB service"

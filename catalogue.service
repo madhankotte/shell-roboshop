@@ -3,12 +3,12 @@ Description=Catalogue Service
 
 [Service]
 User=roboshop
+WorkingDirectory=/app/catalogue
 Environment=MONGO=true
-Environment=MONGO_URL="mongodb://mongodb.madhan66.store:27017/catalogue"
-ExecStart=/bin/node /app/server.js
-WorkingDirectory=/app
-SyslogIdentifier=catalogue
+Environment=MONGO_URL=mongodb://mongodb-dev.madhan66.store:27017/catalogue
+ExecStart=/bin/node server.js
 Restart=always
+SyslogIdentifier=catalogue
 
 [Install]
 WantedBy=multi-user.target

@@ -58,32 +58,40 @@ VALIDATE $? "Downloading catalogue application"
 cd /app >>$LOGS_FILE 2>&1
 VALIDATE $? "Changing directory to /app"
 
+dnf install unzip -y >>$LOGS_FILE 2>&1
+VALIDATE $? "Installing unzip"
+
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+VALIDATE $? "Downloading catalogue application"
+
+cd /app >>$LOGS_FILE 2>&1
+VALIDATE $? "Changing directory to /app"
+
 unzip /tmp/catalogue.zip >>$LOGS_FILE 2>&1
 VALIDATE $? "Extracting catalogue application"
 
-cd catalogue >>$LOGS_FILE 2>&1
+cd /app/catalogue >>$LOGS_FILE 2>&1
 VALIDATE $? "Changing directory to /app/catalogue"
 
 npm install >>$LOGS_FILE 2>&1
 VALIDATE $? "Installing NodeJS dependencies"
 
-cp catalogue/etc/systemd/system/catalogue.service /etc/systemd/system/catalogue.service.bak >>$LOGS_FILE 2>&1
-VALIDATE $? "Backing up existing catalogue service file"
-systemctl daemon-reload
+cp catalogue.service /etc/systemd/system/catalogue.service >>$LOGS_FILE 2>&1
+VALIDATE $? "Copying catalogue systemd service file"
+
+systemctl daemon-reload >>$LOGS_FILE 2>&1
 systemctl enable catalogue >>$LOGS_FILE 2>&1
-VALIDATE $? "Enable catalogue service"
+VALIDATE $? "Enabling catalogue service"
 
-cp mongo.repo /etc/yum.repos.d/mongo.repo >>$LOGS_FILE 2>&1
-VALIDATE $? "copying mongo repo file"
-
-dnf install mongodb-mongos -y >>$LOGS_FILE 2>&1
-VALIDATE $? "installing mongo client"
-
-mongo --host $MONGODB_HOST </app/catalogue/schema/catalogue.js >>$LOGS_FILE 2>&1
-VALIDATE $? "loading catalogue product "
-
-system ctl restart catalogue >>$LOGS_FILE 2>&1
-VALIDATE $? "Restarting catalogue service"
-
+systemctl start catalogue >>$LOGS_FILE 2>&1
+VALIDATE $? "Starting catalogue service"
 
 # MongoDB client installation
+cp mongo.repo /etc/yum.repos.d/mongo.repo >>$LOGS_FILE 2>&1
+VALIDATE $? "Copying mongo repo file"
+
+dnf install mongodb-mongos -y >>$LOGS_FILE 2>&1
+VALIDATE $? "Installing MongoDB client"
+
+mongo --host $MONGODB_HOST </app/catalogue/schema/catalogue.js >>$LOGS_FILE 2>&1
+VALIDATE $? "Loading catalogue schema into MongoDB"

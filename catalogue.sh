@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# Exit if any command fails
 set -e
 
 # Color codes
@@ -20,13 +18,11 @@ LOGS_FILE="$LOGS_FOLDER/${SCRIPT_NAME}.log"
 mkdir -p $LOGS_FOLDER
 echo "Starting the script execution at: $(date)" | tee -a $LOGS_FILE
 
-# Check for root privileges
 if [ "$USERID" -ne 0 ]; then
     echo -e "${R}Error: Please run this script as root or with sudo privileges.${N}"
     exit 1
 fi
 
-# Validation function
 VALIDATE() {
     if [ $1 -ne 0 ]; then
         echo -e "$2 ... ${R}FAILURE${N}" | tee -a $LOGS_FILE
@@ -36,12 +32,12 @@ VALIDATE() {
     fi
 }
 
-#### NODEJS ####
+# Install Node.js
 dnf module disable nodejs -y >>$LOGS_FILE 2>&1
-VALIDATE $? "Disabling NodeJS "
+VALIDATE $? "Disabling NodeJS"
 
 dnf module enable nodejs -y >>$LOGS_FILE 2>&1
-VALIDATE $? "Enabling NodeJS "
+VALIDATE $? "Enabling NodeJS"
 
 dnf install nodejs -y >>$LOGS_FILE 2>&1
 VALIDATE $? "Installing NodeJS"
@@ -51,12 +47,6 @@ VALIDATE $? "Adding roboshop user"
 
 mkdir /app >>$LOGS_FILE 2>&1
 VALIDATE $? "Creating application directory"
-
-curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
-VALIDATE $? "Downloading catalogue application"
-
-cd /app >>$LOGS_FILE 2>&1
-VALIDATE $? "Changing directory to /app"
 
 dnf install unzip -y >>$LOGS_FILE 2>&1
 VALIDATE $? "Installing unzip"
@@ -95,3 +85,5 @@ VALIDATE $? "Installing MongoDB client"
 
 mongo --host $MONGODB_HOST </app/catalogue/schema/catalogue.js >>$LOGS_FILE 2>&1
 VALIDATE $? "Loading catalogue schema into MongoDB"
+
+echo -e "${G}Script execution completed successfully at $(date)!${N}" | tee -a $LOGS_FILE

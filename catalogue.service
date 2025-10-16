@@ -6,6 +6,7 @@ User=roboshop
 Environment=MONGO=true
 Environment=MONGO_URL="mongodb://mongodb.madhan66.store:27017/catalogue"
 ExecStart=/bin/node /app/server.js
+WorkingDirectory=/app
 SyslogIdentifier=catalogue
 Restart=always
 
